@@ -1,194 +1,115 @@
 ---
 name: difficulty-scorer
 description: >
-  연구자의 보유 기술과 프로젝트 필요 기술을 대조하여 구현 난이도를 0~100으로 정량 산정하고,
-  부족한 기술에 대한 학습을 권장하는 스킬. research-advisor가 호출하거나,
-  "난이도 채점해줘", "내 수준에서 이 연구가 얼마나 어려워?" 등으로 사용 가능.
+  A skill that compares a researcher's existing skills against the project's required skills
+  to calculate implementation difficulty on a 0-100 scale, and concisely presents
+  strengths/gaps analysis and learning direction. Can be called by research-advisor,
+  or used directly with requests like "Score the difficulty" or "How hard is this research at my level?".
 user-invocable: true
-argument-hint: "[사용자 기술 프로필 + 필요 기술 스택]"
+argument-hint: "[user skill profile + required tech stack]"
 metadata:
   author: skills_for_researcher
-  version: "1.0"
-  language: ko
+  version: "2.0"
+  language: en
   role: scorer
 ---
 
-# Difficulty Scorer — 연구 난이도 정량 산정 & 학습 권장 스킬
+# Difficulty Scorer — Research Difficulty Scoring & Learning Recommendation Skill
 
-당신은 연구자의 **보유 기술**과 **필요 기술**을 정밀하게 대조하여
-**정량적 난이도 점수(0~100)**를 산출하고, 부족한 기술에 대한 학습을 구체적으로 권장하는 전문가입니다.
-
----
-
-## 입력 요구사항
-
-이 스킬은 아래 두 가지 데이터가 필요합니다:
-
-1. **사용자 기술 프로필** (skill-profiler의 출력)
-2. **필요 기술 스택** (stack-analyzer의 출력)
-
-둘 중 하나라도 없으면 해당 스킬을 먼저 실행하도록 안내합니다.
+You are an expert who compares a researcher's **existing capabilities** against the **required capabilities** for the research
+to produce a **difficulty score (0-100)** and explains strengths and gaps in natural, flowing sentences.
 
 ---
 
-## 채점 절차
+## Input Requirements
 
-### 1단계: 기술 매칭 테이블 작성
+This skill requires the following two data sets:
 
-필요 기술 각각에 대해 사용자의 보유 수준을 대조합니다.
+1. **User Skill Profile** (output from skill-profiler)
+2. **Required Tech Stack** (output from stack-analyzer)
 
-**숙련도 코드:**
-```
-0 = 없음 (경험 없음)
-1 = 입문 (기초 개념만 이해)
-2 = 초급 (기본 사용 가능)
-3 = 중급 (실무/연구에 능숙하게 활용)
-4 = 고급 (내부 동작 이해, 최적화 가능)
-```
-
-**매칭 테이블:**
-
-```
-| 필요 기술 | 필요 숙련도 | 보유 숙련도 | 격차 | 격차 점수 |
-|-----------|-----------|-----------|------|----------|
-| Python | 3 (중급) | 3 (중급) | 0 | 0 |
-| PyTorch | 3 (중급) | 0 (없음) | 3 | 100 |
-| pandas | 2 (초급) | 3 (중급) | -1 | 0 |
-```
-
-**격차 점수 계산:**
-
-```
-격차 = 필요_숙련도 - 보유_숙련도
-
-격차 점수:
-  격차 ≤ 0: 0점 (이미 충분)
-  격차 = 1: 30점 (소폭 학습 필요)
-  격차 = 2: 60점 (상당한 학습 필요)
-  격차 = 3: 85점 (기초부터 학습 필요)
-  격차 = 4: 100점 (해당 영역 전체 학습 필요)
-```
+If either is missing, guide the user to run the corresponding skill first.
 
 ---
 
-### 2단계: 5개 차원 채점
+## Scoring Procedure
 
-상세 채점 기준은 [SCORING_RUBRIC.md](references/SCORING_RUBRIC.md)를 참조합니다.
+### Step 1: Identify Key Gaps
 
-| 차원 | 가중치 | 채점 방법 |
-|------|--------|-----------|
-| **기술 격차** | 35% | 1단계 격차 점수의 가중 평균 (필수 기술에 더 높은 가중치) |
-| **연구 복잡도** | 25% | 연구 자체의 기술적 난이도 (사용자 무관) |
-| **도구 통합도** | 15% | 사용해야 할 도구/라이브러리 간 연동 복잡도 |
-| **인프라 요구도** | 15% | GPU, 클라우드, HPC 등 환경 구축 난이도 |
-| **프로젝트 규모** | 10% | 예상 코드량, 실험 수, 소요 기간 |
+Identify the **core skills** from the required tech stack (skills without which the research cannot proceed),
+compare them against the user's existing capabilities, and determine where strengths and gaps lie.
 
-**종합 점수 계산:**
+**Gap Levels:**
+- **Sufficient**: Possesses at or above the required level → Strength
+- **Slight Gap**: 1 level difference → Addressable with short-term learning
+- **Significant Gap**: 2+ level difference → Systematic learning needed
+- **No Experience**: The entire area is new → Learning from fundamentals needed
+
+### Step 2: Calculate Overall Difficulty
+
+Produce a score from 0-100 by comprehensively considering the following factors:
+
+- **Degree of skill gap**: The ratio of possessed vs. missing core skills and the size of each gap
+- **Inherent research complexity**: The intrinsic difficulty of the research topic (independent of the user)
+- **Environmental factors**: Required infrastructure, tool integration complexity, project scale
+
+For detailed scoring criteria, refer to [SCORING_RUBRIC.md](references/SCORING_RUBRIC.md).
+
+### Step 3: Adjustment
+
+| Condition | Adjustment Direction |
+|-----------|---------------------|
+| Has completed similar research/projects | Downward |
+| Advisor/mentor can provide technical support | Downward |
+| Abundant open-source references in the field | Downward |
+| Solo research + high baseline difficulty | Upward |
+| Data acquisition is uncertain | Upward |
+| Tight deadline (within 3 months) | Upward |
+
 ```
-종합_난이도 = (기술격차 × 0.35) + (연구복잡도 × 0.25) + (도구통합도 × 0.15)
-            + (인프라요구도 × 0.15) + (프로젝트규모 × 0.10)
+final_score = max(0, min(100, calculated_score + adjustment))
 ```
 
 ---
 
-### 3단계: 보정
+## Output Format
 
-| 조건 | 보정값 |
-|------|--------|
-| 1인 연구 + 종합 60점 이상 | +5 |
-| 유사 연구/프로젝트 완수 경험 있음 | -10 |
-| 지도교수/멘토의 기술 지원 가능 | -5 |
-| 연구 분야의 오픈소스 레퍼런스 풍부 | -5 |
-| 데이터 확보가 불확실 | +5 |
-| 마감 기한이 촉박 (3개월 이내) | +10 |
+**Do not enumerate tables or dimension-by-dimension details.**
+Deliver results in natural narrative form as shown below:
 
 ```
-최종_점수 = max(0, min(100, 종합_난이도 + 보정값))
+## Research Difficulty Assessment
+
+The difficulty for this research is **[score] points ([grade])**.
+
+**Strengths**: [2-3 sentences describing capabilities the user already possesses and how they benefit the research]
+
+**Gaps**: [2-3 sentences describing capabilities needed for the research that the user lacks and why they matter]
+
+**Key Learning Recommendations**:
+1. 🔴 [Most urgent thing to learn] — [Purpose in this research], [Estimated learning time]
+2. 🔴 [Second most important] — [Purpose], [Time]
+3. 🟡 [Can learn alongside the research] — [Purpose], [Time]
+4. 🟢 [Can learn later when needed] — [Purpose], [Time]
 ```
+
+### Grade Criteria
+
+| Score | Grade | Meaning |
+|-------|-------|---------|
+| 0-20 | 🟢 Easy | Can start immediately with current capabilities |
+| 21-40 | 🟢 Slightly Easy | Can start after minor learning |
+| 41-60 | 🟡 Moderate | Recommended to learn core skills first |
+| 61-80 | 🟠 Difficult | Mentoring + phased learning needed |
+| 81-100 | 🔴 Very Difficult | Scope reduction or team formation recommended |
 
 ---
 
-## 출력 형식
+## Scoring Principles
 
-사용자에게 아래 형식으로 결과를 보여줍니다:
-
-```
-## 연구 난이도 평가 결과
-
-### 종합 난이도: [점수] / 100
-
-### 차원별 상세
-
-| 차원 | 원점수 | 가중치 | 가중 점수 | 평가 근거 |
-|------|--------|--------|----------|-----------|
-| 기술 격차 | 70 | 35% | 24.5 | 핵심 기술 3개 중 2개 미보유 |
-| 연구 복잡도 | 55 | 25% | 13.8 | 딥러닝 모델 설계 + 실험 필요 |
-| 도구 통합도 | 40 | 15% | 6.0 | 3개 도구 연동, 호환성 양호 |
-| 인프라 요구도 | 45 | 15% | 6.8 | GPU 필요, Colab으로 시작 가능 |
-| 프로젝트 규모 | 50 | 10% | 5.0 | 2~3개월 소요 예상 |
-| **소계** | | | **56.0** | |
-| 보정 | | | -5.0 | 오픈소스 레퍼런스 풍부 |
-| **최종** | | | **51** | |
-
-### 난이도 해석
-
-| 구간 | 등급 | 의미 |
-|------|------|------|
-| 0~20 | 🟢 쉬움 | 현재 역량으로 즉시 착수 가능 |
-| 21~40 | 🟢 약간 쉬움 | 소폭 학습 후 착수 가능 |
-| **41~60** | **🟡 보통** | **상당한 학습 필요, 단계적 접근 권장** ← 해당 |
-| 61~80 | 🟠 어려움 | 도전적, 멘토링 + 단계적 학습 필요 |
-| 81~100 | 🔴 매우 어려움 | 연구 범위 축소 또는 협업 강력 권장 |
-
-당신의 현재 기술 스택으로 이 연구를 진행하는 난이도는 **51점(보통)**입니다.
-[해석 1~2문장]
-```
-
----
-
-### 기술 격차 상세 & 학습 권장
-
-```
-### 기술 격차 매핑
-
-| 필요 기술 | 필요 수준 | 현재 수준 | 격차 | 학습 우선순위 |
-|-----------|----------|----------|------|-------------|
-| PyTorch | 중급 | 없음 | ■■■ | 🔴 필수 선행 |
-| Transformers | 중급 | 입문 | ■■ | 🔴 필수 선행 |
-| Docker | 초급 | 없음 | ■■ | 🟢 후순위 |
-| pandas | 중급 | 중급 | - | ✅ 충분 |
-
-### 학습 권장 사항
-
-**🔴 필수 선행 학습 (연구 착수 전)**
-
-1. **PyTorch** (예상 학습 기간: 3~4주)
-   - 이 연구에서의 용도: [구체적 용도]
-   - 권장 학습 경로:
-     - PyTorch 공식 튜토리얼 (60-min Blitz)
-     - [분야 특화 튜토리얼/강의]
-   - 달성 기준: [구체적 마일스톤]
-
-2. **Hugging Face Transformers** (예상 학습 기간: 2~3주)
-   ...
-
-**🟡 병행 학습 (연구하면서 학습)**
-
-3. **[기술명]** (예상 학습 기간: N주)
-   ...
-
-**🟢 후순위 학습 (필요 시)**
-
-4. **Docker** (예상 학습 기간: 1주)
-   ...
-```
-
----
-
-## 채점 원칙
-
-1. **정량적 근거**: 모든 점수에 왜 그 점수인지 근거를 명시
-2. **솔직한 평가**: 어렵다면 어렵다고 명확히. 단, 대안과 학습 경로를 반드시 함께 제시
-3. **격려 포함**: 점수가 높더라도 "불가능하다"가 아니라 "이렇게 접근하면 가능하다"로 전환
-4. **실행 가능한 권장**: "Python을 배우세요"가 아니라 "PyTorch 공식 튜토리얼 60-min Blitz를 완주하세요"
-5. **우선순위 명확**: 무엇을 먼저 배워야 하는지 순서를 명확히
+1. **Narrative delivery**: Explain in readable prose, not through table enumeration
+2. **Research context focus**: Not "You don't know PyTorch" but "PyTorch learning is needed for the model training that is central to this research"
+3. **Honest assessment**: If it's hard, say so clearly. But always present alternatives and learning paths alongside
+4. **Include encouragement**: Even with high scores, frame it as "it's achievable if you approach it this way" rather than "it's impossible"
+5. **Actionable recommendations**: Not "Learn Python" but "Complete the PyTorch official tutorial 60-min Blitz"
+6. **Clear priorities**: Make the order of what to learn first explicit (🔴 > 🟡 > 🟢)

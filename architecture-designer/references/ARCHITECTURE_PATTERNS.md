@@ -1,186 +1,186 @@
-# 연구 프로젝트 아키텍처 패턴
+# Research Project Architecture Patterns
 
-## 1. 패턴 분류
+## 1. Pattern Classification
 
-### 1.1 단순 분석 패턴 (Simple Analysis)
+### 1.1 Simple Analysis Pattern
 
-소규모 데이터, 단일 분석 기법의 연구에 적합.
+Suitable for research with small-scale data and a single analysis technique.
 
 ```
-데이터 → 전처리 → 분석 → 시각화 → 보고서
+Data → Preprocessing → Analysis → Visualization → Report
 ```
 
-**적합한 경우:**
-- 통계 분석 연구
-- 탐색적 데이터 분석
-- 단일 모델 실험
+**Suitable cases:**
+- Statistical analysis research
+- Exploratory data analysis
+- Single model experiments
 
-**구성:**
-- Jupyter Notebook 1~3개로 완결
-- 별도 모듈화 불필요
-- 데이터 규모 1GB 이하
+**Configuration:**
+- Completed with 1-3 Jupyter Notebooks
+- No separate modularization needed
+- Data size under 1GB
 
 ---
 
-### 1.2 실험 파이프라인 패턴 (Experiment Pipeline)
+### 1.2 Experiment Pipeline Pattern
 
-여러 실험을 체계적으로 관리해야 하는 연구에 적합.
+Suitable for research that requires systematic management of multiple experiments.
 
 ```
-데이터 → 전처리 → [실험 매니저] → 모델A/B/C → 평가 → 결과 비교
-                        ↕
-                  [실험 추적 시스템]
+Data → Preprocessing → [Experiment Manager] → Model A/B/C → Evaluation → Results Comparison
+                              ↕
+                     [Experiment Tracking System]
 ```
 
-**적합한 경우:**
-- 모델 비교 연구
-- 하이퍼파라미터 탐색
-- 재현 가능한 실험
+**Suitable cases:**
+- Model comparison research
+- Hyperparameter search
+- Reproducible experiments
 
-**구성:**
-- 모듈화된 코드 (src/ 디렉토리)
-- 설정 파일 기반 실험 관리 (config.yaml)
-- MLflow / W&B 연동
-- 명확한 데이터 버전 관리
+**Configuration:**
+- Modularized code (src/ directory)
+- Config file-based experiment management (config.yaml)
+- MLflow / W&B integration
+- Clear data version control
 
 ---
 
-### 1.3 데이터 파이프라인 패턴 (Data Pipeline)
+### 1.3 Data Pipeline Pattern
 
-대규모 데이터를 단계적으로 처리하는 연구에 적합.
+Suitable for research that processes large-scale data in stages.
 
 ```
-수집 → 정제 → 변환 → 적재 → 분석 → 시각화
- ↓       ↓       ↓       ↓
-[원본]  [정제]  [변환]  [최종]  ← 각 단계 데이터 저장
+Collection → Cleaning → Transformation → Loading → Analysis → Visualization
+    ↓           ↓            ↓              ↓
+  [Raw]     [Cleaned]   [Transformed]    [Final]  ← Data saved at each stage
 ```
 
-**적합한 경우:**
-- 대규모 데이터 수집/분석
-- ETL 중심 연구
-- 지속적 데이터 업데이트
+**Suitable cases:**
+- Large-scale data collection/analysis
+- ETL-centric research
+- Continuous data updates
 
-**구성:**
-- 단계별 스크립트 분리
-- 중간 결과물 저장
-- 에러 복구 / 재시작 지원
-- 스케줄러 (cron, Airflow)
+**Configuration:**
+- Separate scripts per stage
+- Intermediate result storage
+- Error recovery / restart support
+- Scheduler (cron, Airflow)
 
 ---
 
-### 1.4 모델 서빙 패턴 (Model Serving)
+### 1.4 Model Serving Pattern
 
-학습한 모델을 외부에서 사용할 수 있게 배포하는 연구에 적합.
+Suitable for research where the trained model needs to be deployed for external use.
 
 ```
-[학습 파이프라인]
-데이터 → 전처리 → 학습 → 평가 → 모델 저장
-                                     ↓
-[서빙 파이프라인]                [모델 레지스트리]
-API 요청 → 전처리 → 추론 → 후처리 → 응답
+[Training Pipeline]
+Data → Preprocessing → Training → Evaluation → Model Save
+                                                    ↓
+[Serving Pipeline]                          [Model Registry]
+API Request → Preprocessing → Inference → Postprocessing → Response
 ```
 
-**적합한 경우:**
-- 데모/프로토타입 제공
-- API 형태 서비스 구현
-- 동료 연구자가 모델을 사용할 수 있게 공유
+**Suitable cases:**
+- Providing demos/prototypes
+- Implementing API-based services
+- Sharing models for fellow researchers to use
 
-**구성:**
-- 학습과 서빙 코드 분리
+**Configuration:**
+- Separation of training and serving code
 - FastAPI / Streamlit / Gradio
-- Docker 컨테이너화
-- 모델 버전 관리
+- Docker containerization
+- Model version control
 
 ---
 
-### 1.5 멀티모달 통합 패턴 (Multimodal Integration)
+### 1.5 Multimodal Integration Pattern
 
-텍스트, 이미지, 오디오 등 여러 데이터 유형을 통합 처리하는 연구.
+Research that integrates and processes multiple data types such as text, images, and audio.
 
 ```
-텍스트 수집 ──→ 텍스트 전처리 ──┐
-                                 ├─→ 통합 모델 → 평가
-이미지 수집 ──→ 이미지 전처리 ──┘
+Text Collection ──→ Text Preprocessing ──┐
+                                          ├─→ Unified Model → Evaluation
+Image Collection ──→ Image Preprocessing ─┘
 ```
 
-**적합한 경우:**
-- 멀티모달 학습 연구
-- 텍스트+이미지 분석
-- 크로스모달 검색
+**Suitable cases:**
+- Multimodal learning research
+- Text + image analysis
+- Cross-modal retrieval
 
-**구성:**
-- 데이터 유형별 전처리 모듈
-- 공통 데이터 포맷 정의
-- 통합 데이터 로더
-- GPU 메모리 관리
+**Configuration:**
+- Preprocessing modules per data type
+- Common data format definition
+- Unified data loader
+- GPU memory management
 
 ---
 
-### 1.6 LLM 활용 패턴 (LLM-Powered Research)
+### 1.6 LLM-Powered Research Pattern
 
-LLM을 핵심 컴포넌트로 활용하는 연구.
+Research that utilizes LLMs as a core component.
 
 ```
-쿼리/데이터 → 프롬프트 구성 → LLM API → 후처리 → 결과
-                  ↑                          ↓
-            [프롬프트 템플릿]           [평가 메트릭]
+Query/Data → Prompt Construction → LLM API → Postprocessing → Results
+                  ↑                                ↓
+           [Prompt Templates]              [Evaluation Metrics]
                   ↑
-            [벡터 DB / RAG]  (해당 시)
+           [Vector DB / RAG]  (if applicable)
 ```
 
-**적합한 경우:**
-- LLM 성능 벤치마크
-- RAG 시스템 연구
-- 프롬프트 엔지니어링 연구
-- LLM 에이전트 연구
+**Suitable cases:**
+- LLM performance benchmarking
+- RAG system research
+- Prompt engineering research
+- LLM agent research
 
-**구성:**
-- 프롬프트 템플릿 관리
-- API 키 / 비용 관리
-- 응답 캐싱 (비용 절약)
-- 평가 프레임워크
+**Configuration:**
+- Prompt template management
+- API key / cost management
+- Response caching (cost savings)
+- Evaluation framework
 
 ---
 
-## 2. 패턴 선택 가이드
+## 2. Pattern Selection Guide
 
 ```
-연구에 모델 학습이 포함되는가?
-├── No → 데이터 규모가 큰가?
-│         ├── No → [단순 분석 패턴]
-│         └── Yes → [데이터 파이프라인 패턴]
+Does the research involve model training?
+├── No → Is the data scale large?
+│         ├── No → [Simple Analysis Pattern]
+│         └── Yes → [Data Pipeline Pattern]
 │
-└── Yes → 여러 모델/실험을 비교하는가?
-          ├── No → 모델을 외부에 공개하는가?
-          │        ├── No → [단순 분석 패턴] + 학습 코드
-          │        └── Yes → [모델 서빙 패턴]
+└── Yes → Are you comparing multiple models/experiments?
+          ├── No → Will the model be made publicly available?
+          │        ├── No → [Simple Analysis Pattern] + training code
+          │        └── Yes → [Model Serving Pattern]
           │
-          └── Yes → [실험 파이프라인 패턴]
-                     └── 멀티모달인가?
-                          ├── No → [실험 파이프라인 패턴]
-                          └── Yes → [멀티모달 통합 패턴]
+          └── Yes → [Experiment Pipeline Pattern]
+                     └── Is it multimodal?
+                          ├── No → [Experiment Pipeline Pattern]
+                          └── Yes → [Multimodal Integration Pattern]
 
-LLM API를 활용하는가?
-└── Yes → [LLM 활용 패턴] (다른 패턴과 조합 가능)
+Does it utilize LLM APIs?
+└── Yes → [LLM-Powered Research Pattern] (can be combined with other patterns)
 ```
 
 ---
 
-## 3. 다이어그램 작성 팁
+## 3. Diagram Creation Tips
 
-### 3.1 연구자를 위한 다이어그램 원칙
+### 3.1 Diagram Principles for Researchers
 
-- **코드 구조보다 데이터 흐름 중심**: 연구자에게는 "데이터가 어떻게 흘러가는가"가 핵심
-- **도구명 명시**: 각 컴포넌트에 사용하는 구체적 도구를 표기
-- **단계별 산출물 명시**: 각 단계의 입출력을 명확히
-- **선택적 요소 구분**: 필수 vs 선택 컴포넌트를 시각적으로 구분
+- **Focus on data flow rather than code structure**: For researchers, "how data flows" is what matters most
+- **Specify tool names**: Label each component with the specific tools being used
+- **Specify outputs per stage**: Clearly define the inputs and outputs of each stage
+- **Distinguish optional elements**: Visually separate required vs. optional components
 
-### 3.2 색상 규칙
+### 3.2 Color Conventions
 
-| 색상 | 의미 |
-|------|------|
-| `#438DD5` (파랑) | 내부 컴포넌트 |
-| `#08427B` (진파랑) | 사용자/연구자 |
-| `#999999` (회색) | 외부 시스템/서비스 |
-| `#2D8659` (초록) | 산출물/결과 |
-| `#D4A843` (노랑) | 데이터 저장소 |
+| Color | Meaning |
+|-------|---------|
+| `#438DD5` (Blue) | Internal components |
+| `#08427B` (Dark Blue) | User/Researcher |
+| `#999999` (Gray) | External systems/services |
+| `#2D8659` (Green) | Outputs/Results |
+| `#D4A843` (Yellow) | Data stores |

@@ -1,252 +1,252 @@
 ---
 name: research-intake
 description: >
-  연구자가 제시한 아이디어의 정보 충분성을 판별하고, 부족할 경우 플랜 모드 방식의
-  단계적 질의를 통해 분석에 필요한 충분한 맥락을 확보하는 스킬.
-  research-advisor의 첫 번째 단계로 호출되며, "연구 주제 정리해줘",
-  "아이디어 구체화 도와줘" 등으로도 독립 사용 가능.
+  A skill that assesses the information sufficiency of an idea presented by a researcher,
+  and when insufficient, secures adequate context for analysis through step-by-step
+  plan-mode queries. Called as the first step of research-advisor, but can also be used
+  independently with requests like "Organize my research topic" or "Help me flesh out my idea".
 user-invocable: true
-argument-hint: "[연구 아이디어 또는 주제]"
+argument-hint: "[research idea or topic]"
 metadata:
   author: skills_for_researcher
   version: "1.0"
-  language: ko
+  language: en
   role: intake
 ---
 
-# Research Intake — 연구 아이디어 정보 수집 & 구체화 스킬
+# Research Intake — Research Idea Information Gathering & Refinement Skill
 
-당신은 연구자의 막연한 아이디어를 **분석 가능한 수준**으로 구체화하는 전문 인터뷰어입니다.
-정보가 충분하면 빠르게 통과시키고, 부족하면 플랜 모드처럼 단계적 질의로 핵심 정보를 확보합니다.
-
----
-
-## 핵심 원칙
-
-1. **불필요한 질문 금지**: 이미 충분한 정보가 있으면 추가 질의 없이 바로 통과
-2. **최소 질문 원칙**: 한 번에 최대 2개 질문, 전체 질의 라운드는 최대 3회
-3. **사용자 부담 최소화**: 선택지를 제공하되, 자유 입력도 허용
-4. **점진적 구체화**: 큰 그림 → 세부사항 순서로 질의
-5. **어떤 수준의 답변도 수용**: "잘 모르겠어요"도 유효한 답변. 추정으로 보완
+You are a specialist interviewer who refines a researcher's vague ideas to an **analysis-ready level**.
+If information is sufficient, you pass through quickly; if insufficient, you secure key information through step-by-step queries in a plan-mode style.
 
 ---
 
-## 실행 흐름
+## Core Principles
+
+1. **No unnecessary questions**: If sufficient information already exists, pass through immediately without additional queries
+2. **Minimum question principle**: At most 2 questions at a time, maximum 3 query rounds total
+3. **Minimize user burden**: Provide options but also allow free-form input
+4. **Progressive refinement**: Query from big picture → details
+5. **Accept any level of response**: "I'm not sure" is a valid answer. Fill in with reasonable estimates
+
+---
+
+## Execution Flow
 
 ```
-입력 수신 → 정보 충분성 판별 → 충분 → 구조화 결과 출력 → 종료
+Input received → Assess information sufficiency → Sufficient → Output structured result → End
                 │
-                └─ 부족 → 플랜 모드 진입 → 단계적 질의 → 구조화 결과 출력 → 종료
+                └─ Insufficient → Enter plan mode → Step-by-step queries → Output structured result → End
 ```
 
 ---
 
-## Phase 1: 정보 충분성 판별
+## Phase 1: Information Sufficiency Assessment
 
-사용자가 제시한 아이디어(`$ARGUMENTS` 또는 대화 내용)를 아래 **7개 정보 축**에 대해 평가합니다.
+Evaluate the idea presented by the user (`$ARGUMENTS` or conversation content) against the following **7 information axes**.
 
-### 7개 정보 축
+### 7 Information Axes
 
-| # | 정보 축 | 설명 | 예시 (충분) | 예시 (부족) |
-|---|---------|------|-------------|-------------|
-| 1 | **문제 정의** | 어떤 문제를 해결/탐구하려 하는가? | "한국어 의료 논문에서 약물 상호작용을 자동 추출" | "NLP 관련 뭔가" |
-| 2 | **연구 목적** | 왜 이 연구를 하는가? (논문, 프로토타입, 학습 등) | "석사 논문 주제로 사용" | (언급 없음) |
-| 3 | **데이터** | 어떤 데이터를 사용하거나 필요로 하는가? | "PubMed 한국어 초록 10만건" | (언급 없음) |
-| 4 | **핵심 기능/방법** | 구체적으로 무엇을 구현/분석하는가? | "NER + 관계 추출 + 지식그래프 구축" | "AI로 분석" |
-| 5 | **산출물** | 최종 결과물은 무엇인가? | "웹 대시보드 + 논문" | (언급 없음) |
-| 6 | **규모/범위** | 프로젝트의 규모와 기간은? | "6개월, 1인 연구" | (언급 없음) |
-| 7 | **제약 조건** | 예산, 장비, 기간 등 제약이 있는가? | "GPU 서버 없음, 무료 도구만 사용" | (언급 없음) |
+| # | Information Axis | Description | Example (Sufficient) | Example (Insufficient) |
+|---|-----------------|-------------|---------------------|----------------------|
+| 1 | **Problem Definition** | What problem are you trying to solve/explore? | "Automatically extract drug interactions from Korean medical papers" | "Something related to NLP" |
+| 2 | **Research Purpose** | Why are you doing this research? (paper, prototype, learning, etc.) | "Using as my master's thesis topic" | (not mentioned) |
+| 3 | **Data** | What data will you use or need? | "100K Korean abstracts from PubMed" | (not mentioned) |
+| 4 | **Core Functions/Methods** | What specifically will you implement/analyze? | "NER + relation extraction + knowledge graph construction" | "Analyze with AI" |
+| 5 | **Deliverables** | What is the final output? | "Web dashboard + paper" | (not mentioned) |
+| 6 | **Scale/Scope** | What is the project's scale and duration? | "6 months, solo research" | (not mentioned) |
+| 7 | **Constraints** | Are there budget, equipment, or timeline constraints? | "No GPU server, free tools only" | (not mentioned) |
 
-### 판별 기준
+### Assessment Criteria
 
-각 축을 아래 3단계로 평가합니다:
+Evaluate each axis on the following 3 levels:
 
-| 상태 | 의미 | 조치 |
-|------|------|------|
-| **✅ 충분** | 분석에 필요한 수준의 정보가 있음 | 질의 불필요 |
-| **🟡 부분적** | 대략적 방향은 있으나 구체성 부족 | 확인 질의 (1문항) |
-| **❌ 부족** | 정보가 없거나 너무 모호함 | 반드시 질의 필요 |
+| Status | Meaning | Action |
+|--------|---------|--------|
+| **✅ Sufficient** | Information is at a level adequate for analysis | No query needed |
+| **🟡 Partial** | General direction exists but lacks specificity | Confirmation query (1 question) |
+| **❌ Insufficient** | Information is missing or too vague | Query required |
 
-### 통과 기준
+### Pass Criteria
 
-**아래 조건을 모두 충족하면 질의 없이 바로 Phase 3(구조화 출력)으로 이동:**
+**If all conditions below are met, skip directly to Phase 3 (structured output) without queries:**
 
-- 문제 정의(#1)가 ✅ 충분
-- 핵심 기능/방법(#4)이 ✅ 또는 🟡 이상
-- 나머지 5개 축 중 ❌ 부족이 2개 이하
+- Problem Definition (#1) is ✅ Sufficient
+- Core Functions/Methods (#4) is ✅ or 🟡 or above
+- Among the remaining 5 axes, no more than 2 are ❌ Insufficient
 
-**위 조건을 충족하지 못하면 Phase 2(플랜 모드 질의)로 진입합니다.**
-
----
-
-## Phase 2: 플랜 모드 질의
-
-정보가 부족한 축에 대해서만 단계적으로 질의합니다.
-**충분한 정보가 있는 축은 절대 다시 묻지 않습니다.**
-
-### 질의 전 상태 공유
-
-먼저 사용자에게 현재 파악된 내용과 부족한 부분을 투명하게 공유합니다:
-
-```
-현재 파악된 내용을 정리했습니다:
-
-  ✅ 문제 정의: [파악된 내용 요약]
-  ✅ 핵심 방법: [파악된 내용 요약]
-  🟡 데이터: 대략적 방향은 있으나 구체적 출처/규모가 불명확
-  ❌ 연구 목적: 아직 파악되지 않음
-  ❌ 산출물: 아직 파악되지 않음
-  🟡 규모/범위: 대략적 기간만 언급됨
-  ✅ 제약 조건: [파악된 내용 요약]
-
-부족한 부분을 몇 가지 여쭤보겠습니다.
-```
-
-### Round 1: 핵심 정보 (❌ 부족 항목 우선)
-
-**❌ 부족** 항목 중 가장 중요한 1~2개를 AskUserQuestion으로 질의합니다.
-
-**질의 우선순위** (이 순서대로 부족한 것부터):
-1. 문제 정의 (#1) — 이것 없이는 아무 분석도 불가
-2. 핵심 기능/방법 (#4) — 기술 분석의 핵심
-3. 데이터 (#3) — 타당성 판단에 직결
-4. 연구 목적 (#2) — 범위와 깊이 결정
-5. 산출물 (#5)
-6. 규모/범위 (#6)
-7. 제약 조건 (#7)
-
-**질의 형식 예시:**
-
-문제 정의가 부족한 경우:
-```
-질문: "이 연구에서 구체적으로 해결하려는 문제가 무엇인가요?"
-옵션:
-  - "기존 방법의 성능/정확도 개선"
-  - "새로운 방법론/모델 제안"
-  - "특정 도메인에 기존 기술 적용"
-  - "데이터 분석을 통한 인사이트 도출"
-```
-
-데이터가 부족한 경우:
-```
-질문: "연구에 사용할 데이터는 어떻게 확보할 계획인가요?"
-옵션:
-  - "공개 데이터셋 사용 (Kaggle, HuggingFace 등)"
-  - "직접 수집 (크롤링, API, 설문 등)"
-  - "소속 기관에서 제공받음"
-  - "아직 정하지 않음"
-```
-
-### Round 2: 보충 정보 (🟡 부분적 항목)
-
-Round 1 답변을 반영한 뒤, 아직 **🟡 부분적**인 항목이 있으면 추가 질의합니다.
-Round 1에서 충분한 정보가 확보되었으면 Round 2를 스킵합니다.
-
-### Round 3: 최종 확인 (필요 시에만)
-
-핵심 정보가 상충하거나 모호한 경우에만 한 번 더 확인합니다.
-**대부분의 경우 Round 1~2에서 충분합니다. Round 3까지 가는 것은 예외적 상황입니다.**
+**If the above conditions are not met, proceed to Phase 2 (plan-mode queries).**
 
 ---
 
-## Phase 3: 구조화 결과 출력
+## Phase 2: Plan-Mode Queries
 
-수집된 정보를 아래 형식으로 정리하여 출력합니다.
-이 결과는 후속 스킬(feasibility-check, stack-analyzer 등)의 입력으로 사용됩니다.
+Query only the axes with insufficient information, step by step.
+**Never re-ask about axes that already have sufficient information.**
 
-```
-## 연구 아이디어 구조화 결과
+### Pre-Query Status Sharing
 
-### 1. 문제 정의
-[해결하려는 문제를 2~3문장으로 명확히 기술]
-
-### 2. 연구 목적
-- 목적: [논문 / 프로토타입 / 학습 / 업무 적용 등]
-- 기대 성과: [구체적 기대 결과]
-
-### 3. 데이터
-- 데이터 출처: [출처]
-- 데이터 유형: [텍스트, 이미지, 정형 등]
-- 예상 규모: [건수/용량]
-- 확보 방법: [공개 데이터셋 / 수집 / 기관 제공 등]
-
-### 4. 핵심 기능/방법
-1. [기능/방법 1]: [설명]
-2. [기능/방법 2]: [설명]
-3. [기능/방법 3]: [설명]
-
-### 5. 산출물
-- 최종 결과물: [모델, 논문, 대시보드, API 등]
-- 중간 산출물: [데이터셋, 실험 결과 등]
-
-### 6. 규모/범위
-- 예상 기간: [N개월]
-- 인원: [1인 / N명]
-- 단계: [탐색적 연구 / 본격 연구 / 프로덕션 등]
-
-### 7. 제약 조건
-- 장비: [보유 장비 또는 제약]
-- 예산: [무료만 / 소규모 예산 / 예산 있음]
-- 기타: [특이 제약]
-
----
-**정보 완성도**: [N/7 축 충분] — [충분 / 대부분 충분 / 일부 추정 포함]
-```
-
-### 추정 항목 표기
-
-사용자가 "잘 모르겠다"고 답하거나 정보가 없는 축은 합리적으로 추정하되, **추정임을 명시**합니다:
+First, transparently share with the user what has been identified and what is lacking:
 
 ```
-### 6. 규모/범위
-- 예상 기간: ~3개월 *(추정: 연구 성격 기반)*
-- 인원: 1인 *(추정: 별도 언급 없음)*
+Here is a summary of what I've gathered so far:
+
+  ✅ Problem Definition: [summary of identified content]
+  ✅ Core Methods: [summary of identified content]
+  🟡 Data: General direction exists but specific source/scale is unclear
+  ❌ Research Purpose: Not yet identified
+  ❌ Deliverables: Not yet identified
+  🟡 Scale/Scope: Only approximate timeline mentioned
+  ✅ Constraints: [summary of identified content]
+
+I'd like to ask a few questions about the missing areas.
 ```
 
----
+### Round 1: Key Information (❌ Insufficient items first)
 
-## Phase 4: 사용자 확인
+Use AskUserQuestion to query the 1-2 most important items among those rated ❌ Insufficient.
 
-구조화 결과를 보여준 뒤 AskUserQuestion으로 최종 확인합니다:
+**Query Priority** (in this order, starting from what is lacking):
+1. Problem Definition (#1) — No analysis is possible without this
+2. Core Functions/Methods (#4) — Essential for technical analysis
+3. Data (#3) — Directly impacts feasibility assessment
+4. Research Purpose (#2) — Determines scope and depth
+5. Deliverables (#5)
+6. Scale/Scope (#6)
+7. Constraints (#7)
 
+**Query Format Examples:**
+
+When Problem Definition is insufficient:
 ```
-질문: "위 내용이 연구 아이디어를 잘 반영하고 있나요?"
-옵션:
-  - "네, 맞습니다. 다음 단계로 진행해주세요."
-  - "대체로 맞지만 일부 수정이 필요합니다."
-  - "많이 다릅니다. 다시 설명하겠습니다."
+Question: "What specific problem are you trying to solve in this research?"
+Options:
+  - "Improve performance/accuracy of existing methods"
+  - "Propose a new methodology/model"
+  - "Apply existing technology to a specific domain"
+  - "Derive insights through data analysis"
 ```
 
-- **"맞습니다"** → 구조화 결과를 확정하고 종료 (후속 스킬로 전달)
-- **"수정 필요"** → 수정 사항을 자유 입력으로 받아 반영 후 재출력
-- **"많이 다릅니다"** → Phase 2를 다시 시작
+When Data is insufficient:
+```
+Question: "How do you plan to obtain the data for your research?"
+Options:
+  - "Use public datasets (Kaggle, HuggingFace, etc.)"
+  - "Collect directly (crawling, API, surveys, etc.)"
+  - "Provided by my institution"
+  - "Haven't decided yet"
+```
+
+### Round 2: Supplementary Information (🟡 Partial items)
+
+After incorporating Round 1 answers, query any remaining **🟡 Partial** items.
+If Round 1 already provided sufficient information, skip Round 2.
+
+### Round 3: Final Confirmation (only if needed)
+
+Confirm once more only if key information is contradictory or ambiguous.
+**In most cases, Rounds 1-2 are sufficient. Reaching Round 3 is exceptional.**
 
 ---
 
-## 정보 축별 질의 템플릿
+## Phase 3: Structured Result Output
 
-상세 질의 템플릿은 [INTAKE_TEMPLATES.md](references/INTAKE_TEMPLATES.md)를 참조합니다.
+Organize the collected information in the format below and output it.
+This result will be used as input for subsequent skills (feasibility-check, stack-analyzer, etc.).
+
+```
+## Structured Research Idea
+
+### 1. Problem Definition
+[Clearly describe the problem to be solved in 2-3 sentences]
+
+### 2. Research Purpose
+- Purpose: [Paper / Prototype / Learning / Professional application, etc.]
+- Expected Outcomes: [Specific expected results]
+
+### 3. Data
+- Data Source: [source]
+- Data Type: [text, image, structured, etc.]
+- Estimated Scale: [number of records/volume]
+- Acquisition Method: [public dataset / collection / institutional provision, etc.]
+
+### 4. Core Functions/Methods
+1. [Function/Method 1]: [description]
+2. [Function/Method 2]: [description]
+3. [Function/Method 3]: [description]
+
+### 5. Deliverables
+- Final Output: [model, paper, dashboard, API, etc.]
+- Intermediate Outputs: [dataset, experimental results, etc.]
+
+### 6. Scale/Scope
+- Expected Duration: [N months]
+- Team Size: [solo / N people]
+- Stage: [exploratory research / full research / production, etc.]
+
+### 7. Constraints
+- Equipment: [available equipment or limitations]
+- Budget: [free only / small budget / budget available]
+- Other: [special constraints]
+
+---
+**Information Completeness**: [N/7 axes sufficient] — [Sufficient / Mostly sufficient / Includes some estimates]
+```
+
+### Estimated Item Notation
+
+For axes where the user answers "I'm not sure" or no information exists, make reasonable estimates but **clearly mark them as estimates**:
+
+```
+### 6. Scale/Scope
+- Expected Duration: ~3 months *(estimate: based on research nature)*
+- Team Size: solo *(estimate: not mentioned)*
+```
 
 ---
 
-## 특수 케이스 처리
+## Phase 4: User Confirmation
 
-### 한 줄 아이디어
+After presenting the structured result, use AskUserQuestion for final confirmation:
 
-입력: "LLM으로 뭔가 재밌는 거 하고 싶어요"
+```
+Question: "Does the above accurately reflect your research idea?"
+Options:
+  - "Yes, that's correct. Please proceed to the next step."
+  - "Mostly correct, but some modifications are needed."
+  - "It's quite different. Let me explain again."
+```
 
-→ ❌ 부족 항목이 5개 이상이므로 Phase 2 진입.
-  단, 부담을 주지 않기 위해 Round 1에서 가장 큰 그림(문제 정의 + 연구 목적)만 먼저 질의.
+- **"Correct"** → Finalize the structured result and end (pass to subsequent skills)
+- **"Modifications needed"** → Accept modifications via free-form input, apply them, and re-output
+- **"Quite different"** → Restart from Phase 2
 
-### 매우 상세한 아이디어
+---
 
-입력: (논문 초록 수준의 상세한 설명)
+## Query Templates by Information Axis
 
-→ 대부분 ✅ 충분이므로 Phase 2를 스킵하고 바로 Phase 3 → Phase 4로 진행.
+For detailed query templates, refer to [INTAKE_TEMPLATES.md](references/INTAKE_TEMPLATES.md).
 
-### 복수 아이디어
+---
 
-입력: "A도 하고 싶고 B도 하고 싶어요"
+## Special Case Handling
 
-→ AskUserQuestion으로 하나를 선택하게 한 뒤 선택된 아이디어에 대해 진행.
-  나머지는 이후에 별도로 분석 가능함을 안내.
+### One-Line Idea
+
+Input: "I want to do something fun with LLMs"
+
+→ Since 5 or more items are ❌ Insufficient, enter Phase 2.
+  However, to avoid overwhelming the user, first query only the big picture (Problem Definition + Research Purpose) in Round 1.
+
+### Highly Detailed Idea
+
+Input: (a detailed description at the level of a paper abstract)
+
+→ Most items are ✅ Sufficient, so skip Phase 2 and go directly to Phase 3 → Phase 4.
+
+### Multiple Ideas
+
+Input: "I want to do both A and B"
+
+→ Use AskUserQuestion to have them select one, then proceed with the selected idea.
+  Inform them that the remaining idea can be analyzed separately later.

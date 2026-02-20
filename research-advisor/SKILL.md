@@ -1,307 +1,232 @@
 ---
 name: research-advisor
 description: >
-  연구자가 연구 아이디어나 주제를 제시했을 때, 정보 충분성 판별부터 기술적 타당성 분석,
-  난이도 산정, 아키텍처 설계까지 전체 흐름을 오케스트레이션하는 메인 스킬.
-  "이 연구 가능할까?", "이 아이디어 실현 가능해?", "연구 주제 분석해줘",
-  "이 프로젝트 타당성 검토해줘" 등의 요청 시 트리거된다.
+  When a researcher presents a research idea or topic, this main skill orchestrates the entire flow
+  from information sufficiency assessment to technical feasibility analysis, difficulty scoring,
+  and architecture design.
+  Triggered by requests such as "Is this research feasible?", "Can this idea be realized?",
+  "Analyze this research topic", or "Review the feasibility of this project".
 user-invocable: true
-argument-hint: "[연구 아이디어 또는 주제]"
+argument-hint: "[research idea or topic]"
 metadata:
   author: skills_for_researcher
-  version: "1.1"
-  language: ko
+  version: "2.0"
+  language: en
   role: orchestrator
 ---
 
-# Research Advisor — 연구 프로젝트 오케스트레이터
+# Research Advisor — Thin Orchestrator
 
-당신은 연구자의 아이디어를 평가하고 실행 계획으로 전환하는 **오케스트레이터**입니다.
-직접 분석하지 않고, 각 전문 스킬과 서브 에이전트를 적절한 순서로 호출하여 결과를 종합합니다.
-
----
-
-## 실행 흐름
-
-아래 흐름을 반드시 순서대로 따릅니다.
-
-### Step 1: 아이디어 수집 & 정보 충분성 확보 (research-intake)
-
-**이 단계가 모든 분석의 기반입니다. 정보가 부족한 채로 다음 단계로 넘어가지 마세요.**
-
-사용자가 `$ARGUMENTS`로 아이디어를 제공했으면 이를 기반으로 시작합니다.
-
-#### 1-1: 정보 충분성 판별
-
-사용자의 입력을 아래 **7개 정보 축**에 대해 평가합니다:
-
-| # | 정보 축 | 설명 |
-|---|---------|------|
-| 1 | 문제 정의 | 어떤 문제를 해결/탐구하려 하는가? |
-| 2 | 연구 목적 | 왜 이 연구를 하는가? (논문, 학습, 실무 등) |
-| 3 | 데이터 | 어떤 데이터가 필요하고, 확보 가능한가? |
-| 4 | 핵심 기능/방법 | 구체적으로 무엇을 구현/분석하는가? |
-| 5 | 산출물 | 최종 결과물은 무엇인가? |
-| 6 | 규모/범위 | 프로젝트의 규모와 기간은? |
-| 7 | 제약 조건 | 예산, 장비, 기간 등 제약은? |
-
-각 축을 **✅ 충분 / 🟡 부분적 / ❌ 부족**으로 평가합니다.
-
-#### 1-2: 통과 판단
-
-**바로 통과 조건** (추가 질의 없이 Step 2로):
-- 문제 정의(#1)가 ✅
-- 핵심 기능/방법(#4)이 ✅ 또는 🟡
-- ❌ 부족이 2개 이하
-
-**플랜 모드 진입 조건** (위 조건 미충족):
-- 사용자에게 현재 파악된 내용과 부족한 부분을 먼저 공유
-- 부족한 축에 대해 AskUserQuestion으로 단계적 질의 (최대 3라운드)
-- 충분한 축은 절대 다시 묻지 않음
-
-#### 1-3: 플랜 모드 질의 (정보 부족 시)
-
-**먼저 현재 상태를 사용자에게 투명하게 공유합니다:**
-
-```
-현재 파악된 내용을 정리했습니다:
-
-  ✅ 문제 정의: [요약]
-  🟡 핵심 방법: [요약 + 부족한 부분]
-  ❌ 데이터: 아직 파악되지 않음
-  ❌ 연구 목적: 아직 파악되지 않음
-  ...
-
-몇 가지 여쭤보겠습니다.
-```
-
-**질의 우선순위** (이 순서대로 ❌인 것부터):
-1. 문제 정의 — 이것 없이는 아무 분석도 불가
-2. 핵심 기능/방법 — 기술 분석의 핵심
-3. 데이터 — 타당성 판단에 직결
-4. 연구 목적 → 산출물 → 규모/범위 → 제약 조건
-
-**질의 규칙:**
-- 한 번에 최대 2개 질문
-- 선택지를 제공하되 "기타" 자유 입력 허용
-- "잘 모르겠다"도 유효한 답변 → 합리적 추정으로 보완 (추정 표기)
-- 전체 질의 라운드 최대 3회
-
-#### 1-4: 구조화 결과 출력 & 사용자 확인
-
-수집된 정보를 구조화하여 사용자에게 보여주고 확인을 받습니다:
-
-```
-## 연구 아이디어 구조화 결과
-
-| 항목 | 내용 |
-|------|------|
-| 문제 정의 | [내용] |
-| 연구 목적 | [내용] |
-| 데이터 | [출처, 유형, 규모] |
-| 핵심 기능/방법 | 1. ... 2. ... 3. ... |
-| 산출물 | [내용] |
-| 규모/범위 | [기간, 인원] |
-| 제약 조건 | [내용] |
-
-정보 완성도: N/7 축 충분
-```
-
-AskUserQuestion으로 확인:
-- "맞습니다" → Step 2로 진행
-- "수정 필요" → 수정 반영 후 재출력
-- "많이 다릅니다" → 질의 재시작
+This skill is responsible **only for flow control and data passing**.
+The detailed procedures, query methods, and output formats for each step follow the respective skill's own SKILL.md specification.
+Do not let the orchestrator redefine sub-skill procedures or reduce their output formats.
 
 ---
 
-### Step 2: 타당성 검증 (feasibility-check 서브 에이전트)
-
-Task 도구로 **feasibility-check 서브 에이전트**를 실행합니다.
-**Step 1의 구조화 결과 전체를 서브 에이전트에게 전달합니다.**
+## Execution Flow
 
 ```
-Task 도구 호출:
-- subagent_type: general-purpose
-- prompt: 아래 연구 아이디어의 기술적 타당성을 분석해주세요.
-
-  [Step 1에서 확정된 구조화 결과 전체]
-
-  분석 기준:
-  1. 해당 아이디어를 현존하는 기술로 구현할 수 있는가?
-  2. 구현 가능하다면 어떤 기술 영역이 필요한가?
-  3. 구현이 어렵다면 그 이유는 무엇인가?
-  4. 유사 연구 사례가 존재하는가?
-
-  WebSearch를 활용하여 최신 기술 동향과 유사 연구 사례를 반드시 확인하세요.
-
-  결과를 아래 형식으로 반환하세요:
-  - 판정: [구현 가능 / 조건부 가능 / 구현 불가]
-  - 판정 근거: (3~5문장)
-  - 필요 기술 영역: (목록)
-  - 유사 사례: (있다면)
-  - 주요 리스크: (있다면)
-```
-
-**판정 결과에 따른 분기:**
-
-- **구현 불가** → 사용자에게 불가 사유를 설명하고, 가능한 대안 방향을 제시한 뒤 종료
-- **조건부 가능** → 조건을 사용자에게 설명하고 진행 여부를 확인한 뒤 Step 3으로
-- **구현 가능** → Step 3으로 진행
-
----
-
-### Step 3: 병렬 분석 (skill-profiler + stack-analyzer)
-
-**두 작업을 동시에 수행합니다:**
-
-#### 3-A: 사용자 기술 역량 파악 (메인 스레드)
-
-AskUserQuestion 도구를 사용하여 사용자의 기술 역량을 단계적으로 질의합니다.
-질의 항목:
-
-1. **프로그래밍 언어**: 어떤 언어를 사용하며 각 숙련도는? (입문/초급/중급/고급)
-2. **데이터 분석 도구**: pandas, numpy, R, MATLAB, SPSS 등 경험
-3. **ML/DL 프레임워크**: PyTorch, TensorFlow, scikit-learn 등 경험
-4. **데이터 수집/처리**: 웹 크롤링, API 활용, 데이터 전처리 경험
-5. **인프라/환경**: 클라우드(AWS, GCP), Docker, HPC, GPU 서버 경험
-6. **도메인 도구**: 연구 분야 특화 도구 경험 (예: 생물정보학, NLP, CV 등)
-7. **완성한 프로젝트**: 이전에 완수한 연구/프로젝트의 규모와 종류
-
-결과를 아래 형식으로 정리:
-```
-사용자_기술_프로필:
-  언어: [{기술: "Python", 숙련도: "중급"}, ...]
-  데이터분석: [...]
-  ML/DL: [...]
-  데이터수집: [...]
-  인프라: [...]
-  도메인도구: [...]
-  프로젝트경험: [설명]
-```
-
-#### 3-B: 필요 기술 스택 분석 (stack-analyzer 서브 에이전트, 백그라운드)
-
-3-A와 **동시에** Task 도구를 백그라운드로 실행합니다:
-
-```
-Task 도구 호출:
-- subagent_type: general-purpose
-- run_in_background: true
-- prompt: 아래 연구 프로젝트를 수행하는 데 필요한 기술 스택을 분석해주세요.
-
-  [Step 1에서 확정된 구조화 결과]
-  [Step 2 타당성 분석에서 도출된 필요 기술 영역]
-
-  다음 카테고리별로 필요 기술을 도출하세요:
-  1. 프로그래밍 언어 (필요 숙련도 포함)
-  2. 데이터 수집/전처리 도구
-  3. 분석/모델링 프레임워크
-  4. 시각화 도구
-  5. 실험 관리 도구 (MLflow, W&B 등)
-  6. 인프라/컴퓨팅 환경
-  7. 도메인 특화 라이브러리
-
-  각 기술에 대해:
-  - 기술명
-  - 필요 숙련도 (입문/초급/중급/고급)
-  - 이 연구에서의 용도
-  - 대체 가능한 기술
-
-  WebSearch로 해당 연구 분야의 최신 도구와 트렌드를 확인하세요.
-```
-
-3-A 완료 후 3-B의 결과를 확인(TaskOutput)합니다.
-
----
-
-### Step 4: 난이도 산정 및 학습 권장 (difficulty-scorer)
-
-Step 3의 두 결과를 조합하여 난이도를 산정합니다.
-
-**난이도 산정 기준:**
-
-| 차원 | 가중치 | 설명 |
-|------|--------|------|
-| 기술 격차 | 35% | 사용자 보유 기술 vs 필요 기술 간 차이 |
-| 연구 복잡도 | 25% | 연구 자체의 기술적 복잡성 |
-| 도구 통합도 | 15% | 여러 도구/라이브러리 연동 복잡성 |
-| 인프라 요구도 | 15% | 컴퓨팅 자원, 환경 구축 복잡성 |
-| 프로젝트 규모 | 10% | 예상 코드량, 실험 수, 개발 기간 |
-
-**출력 형식 (사용자에게 직접 보여줌):**
-
-```
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  연구 난이도 평가 결과
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  종합 난이도: XX / 100점
-
-  [차원별 점수 테이블]
-  [난이도 해석]
-  [부족한 기술 영역 목록]
-  [학습 권장 기술 및 우선순위]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-학습 권장 시 다음을 포함:
-- 해당 기술을 왜 배워야 하는지 (연구에서의 용도)
-- 추천 학습 리소스 (공식 문서, 튜토리얼, 강의)
-- 예상 학습 기간
-- 학습 우선순위 (🔴 필수 선행 / 🟡 병행 가능 / 🟢 후순위)
-
----
-
-### Step 5: 아키텍처 설계 (architecture-designer)
-
-사용자에게 아키텍처 설계를 진행할지 확인한 뒤, 진행한다면:
-
-- 연구 시스템의 전체 구조를 Mermaid 다이어그램으로 시각화
-- 데이터 파이프라인 흐름 설계
-- 주요 컴포넌트 간 관계 정의
-- 사용자와 대화하며 점진적으로 설계를 발전시킴
-
-이 단계는 **사용자와 대화형으로** 진행합니다. 초안을 제시하고 피드백을 받아 수정합니다.
-
----
-
-## 흐름도 요약
-
-```
-사용자: "연구 아이디어"
-        │
-        ▼
-  [Step 1] research-intake: 정보 충분성 판별
-        │
-        ├─ 충분 → 구조화 출력 → 사용자 확인
-        │
-        └─ 부족 → 플랜 모드 질의 (최대 3라운드)
-                   → 구조화 출력 → 사용자 확인
-        │
-        ▼
-  [Step 2] feasibility-check 서브 에이전트 ──→ 불가 → 대안 제시 → 종료
-        │
-        │ (가능/조건부)
-        ▼
-  [Step 3] ┌──────────────────────┐
-           │  병렬 실행            │
-           │  3-A: 사용자 기술 질의 │
-           │  3-B: 필요 스택 분석   │
-           └──────────────────────┘
-        │
-        ▼
-  [Step 4] 난이도 채점 + 학습 권장
-        │
-        ▼
-  [Step 5] 아키텍처 공동 설계
+Step 1  research-intake         Information gathering & structuring
+          |
+          v
+Step 2  feasibility-check       Feasibility verification (sub-agent)
+          |
+          +-- Not feasible -> Deliver results to user -> End
+          +-- Conditionally feasible -> Explain conditions to user -> Confirm whether to proceed
+          |
+          v
+Step 3  skill-profiler           Assess user's technical capabilities (main thread)
+     +  stack-analyzer           Analyze required tech stack (sub-agent, background)
+          |
+          v
+Step 4  difficulty-scorer        Difficulty scoring + learning recommendations
+          |
+          v
+Step 5  architecture-designer    Collaborative architecture design (after user confirmation)
 ```
 
 ---
 
-## 주의사항
+## Step 1: Information Gathering — research-intake
 
-- **Step 1을 절대 건너뛰지 마세요.** 정보가 부족한 상태에서 분석하면 결과가 부정확합니다.
-- 이 스킬은 **연구자** 대상입니다. 기업 개발 용어가 아닌 연구 맥락의 언어를 사용하세요.
-- 기술 스택 추천 시 연구 커뮤니티에서 널리 사용되는 도구를 우선합니다.
-- 난이도 점수를 제시할 때 반드시 **정량적 수치**와 함께 해석을 제공합니다.
-- 각 Step 완료 후 결과를 사용자에게 보여주고, 다음 Step 진행 여부를 확인합니다.
+**Purpose**: Secure sufficient context for subsequent analysis.
+
+**Execution**: Run according to the research-intake skill specification.
+- Pass the user's `$ARGUMENTS` as initial input
+- Information sufficiency assessment, plan-mode queries when insufficient, and structured result confirmation are all handled by research-intake
+
+**Data Contract**:
+- Input: User's original idea (`$ARGUMENTS`)
+- Output: `structured_result` — A table with 7 information axes organized (research-intake Phase 3 output format)
+
+**Next Step Condition**: Proceed to Step 2 when the user confirms the structured result ("That's correct").
+
+---
+
+## Step 2: Feasibility Verification — feasibility-check (Sub-Agent)
+
+**Purpose**: Determine whether the idea can be realized with currently existing technology.
+
+**Execution**: Create a sub-agent using the Task tool.
+
+```
+Task tool invocation:
+  subagent_type: general-purpose
+  prompt: |
+    You are the feasibility-check skill.
+    Please analyze the technical feasibility of the research idea below.
+    Follow the analysis procedure (steps 1-3) and output format defined
+    in the feasibility-check SKILL.md and return the results as-is.
+
+    === Structured Research Idea ===
+    [Insert the entire structured_result from Step 1 here]
+```
+
+**Key Rule**: Do not separately specify an output format. Allow the sub-agent to follow the complete structure defined in the "Output Format" section of feasibility-check/SKILL.md on its own (including the technical element analysis table, similar research cases + sources, risk mitigation strategies, and alternatives section).
+
+**Data Contract**:
+- Input: `structured_result` (Step 1 output)
+- Output: `feasibility_result` — Verdict (✅/⚠️/❌), technical element analysis, similar cases, required skill areas, risks, alternatives
+
+**Branching Logic**:
+
+| Verdict | Orchestrator Action |
+|---------|-------------------|
+| ❌ Not feasible | Show the `feasibility_result` to the user as-is, highlight the alternatives section, then **end** |
+| ⚠️ Conditionally feasible | Show the `feasibility_result` to the user, use AskUserQuestion to confirm whether to proceed. If "proceed", go to Step 3 |
+| ✅ Feasible | Show the `feasibility_result` to the user and proceed to Step 3 |
+
+---
+
+## Step 3: Parallel Analysis — skill-profiler + stack-analyzer
+
+**Purpose**: Simultaneously assess the user's existing skills and the project's required skills.
+
+### 3-A: skill-profiler (Main Thread)
+
+**Execution**: Run according to the skill-profiler skill specification.
+- Pass `structured_result` to base queries on the core domain concepts of the research topic
+- Query about core domain concepts and methodologies of the research, not general-purpose skills (pandas, Git, etc.)
+
+**Data Contract**:
+- Input: `structured_result` (Step 1 output — used to design domain-tailored questions)
+- Output: `user_skill_profile` — The complete structure defined in skill-profiler's "Output Format" section
+
+### 3-B: stack-analyzer (Sub-Agent, Background)
+
+**Execution**: Create a sub-agent in the background using the Task tool **simultaneously with the start of 3-A**.
+
+```
+Task tool invocation:
+  subagent_type: general-purpose
+  run_in_background: true
+  prompt: |
+    You are the stack-analyzer skill.
+    Please analyze the required tech stack for the research project below.
+    Follow the analysis procedure (steps 1-3) and output format defined
+    in the stack-analyzer SKILL.md and return the results as-is.
+
+    === Structured Research Idea ===
+    [Insert the entire structured_result from Step 1 here]
+
+    === Required Skill Areas from Feasibility Analysis ===
+    [Insert the "Required Skill Areas" section from Step 2 feasibility_result here]
+```
+
+**Key Rule**: Do not separately specify an output format. Allow the sub-agent to follow the complete structure defined in the "Output Format" section of stack-analyzer/SKILL.md on its own (including step-by-step tables, integrated stack summary, dependency relationships, and computing resource table).
+
+**Joining**: After 3-A (skill-profiler) completes, collect the 3-B results using TaskOutput.
+
+**Data Contract**:
+- Input: `structured_result` + required skill areas from `feasibility_result`
+- Output: `required_tech_stack` — The complete structure defined in stack-analyzer's "Output Format" section
+
+---
+
+## Step 4: Difficulty Scoring — difficulty-scorer
+
+**Purpose**: Compare existing skills against required skills to produce a quantitative difficulty score and recommend learning paths.
+
+**Execution**: Run according to the difficulty-scorer skill specification.
+- The scoring procedure (steps 1-3) and output format are all performed as defined by difficulty-scorer itself
+
+**Data Passing**: Explicitly pass the following two data sets as input to difficulty-scorer.
+
+```
+Based on data collected from previous steps, please score the difficulty
+and recommend learning paths according to the difficulty-scorer skill specification.
+
+=== User Skill Profile (skill-profiler output) ===
+[Insert the entire user_skill_profile from Step 3-A here]
+
+=== Required Tech Stack (stack-analyzer output) ===
+[Insert the entire required_tech_stack from Step 3-B here]
+```
+
+**Data Contract**:
+- Input: `user_skill_profile` (Step 3-A) + `required_tech_stack` (Step 3-B)
+- Output: `difficulty_result` — Overall score, strengths/gaps narrative, learning recommendations (narrative format)
+
+**User Delivery**: Show the `difficulty_result` to the user as-is.
+
+---
+
+## Step 5: Architecture Design — architecture-designer
+
+**Purpose**: Design the research system's architecture through dialogue with the user.
+
+**Entry Condition**: Use AskUserQuestion to ask the user whether to proceed with architecture design.
+- "Proceed" → Run according to the architecture-designer skill specification
+- "Skip" → Move to final summary
+
+**Execution**: Run according to the architecture-designer skill specification.
+- The interactive design procedure for Phases A-E is all performed as defined by architecture-designer itself
+
+**Data Passing**: Provide previous step results as context.
+
+```
+Please proceed with architecture design according to the architecture-designer
+skill specification, referencing the previous analysis results.
+
+=== Structured Research Idea ===
+[Summary of structured_result]
+
+=== Confirmed Tech Stack ===
+[Integrated stack summary section from required_tech_stack]
+```
+
+---
+
+## Final Summary
+
+After all Steps are complete (or if Step 5 was skipped), generate the following summary.
+This summary is composed by **quoting** outputs from previous steps (no re-analysis):
+
+```
+## Technical Feasibility Analysis — Final Summary
+
+**Research Topic**: [Quote from structured_result]
+
+| Item | Result |
+|------|--------|
+| Technical Feasibility | [Quote verdict from feasibility_result] |
+| Implementation Difficulty | [Quote overall score from difficulty_result] |
+| Core Tech Stack | [Quote integrated summary from required_tech_stack] |
+| Top Risk | [Quote major risk from feasibility_result] |
+| Key Learning Needed | [Quote 🔴 items from difficulty_result] |
+
+**Recommended Next Actions**:
+1. [Highest-priority item from difficulty_result's key learning recommendations]
+2. [Data acquisition-related action from structured_result]
+3. [Next steps from architecture design results, if available]
+```
+
+---
+
+## Orchestrator Principles
+
+1. **No redefining sub-procedures**: Do not rewrite each skill's analysis procedures, query methods, or output formats in the orchestrator
+2. **No reducing output formats**: Do not request simplified output in sub-agent prompts compared to what the skill specification defines
+3. **Data passing only**: When passing output from one Step to the next, pass the original text as-is
+4. **Branching logic only**: Handle only flow branching such as feasibility verdicts (✅/⚠️/❌) and user confirmations (proceed/skip)
+5. **Quoting only**: In the final summary, quote previous outputs rather than re-analyzing them

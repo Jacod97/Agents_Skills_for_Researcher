@@ -1,193 +1,193 @@
-# 정보 축별 질의 템플릿
+# Query Templates by Information Axis
 
-## 사용 방법
+## How to Use
 
-각 정보 축이 ❌ 부족 또는 🟡 부분적 상태일 때, 아래 템플릿을 참조하여 AskUserQuestion을 구성합니다.
-상황에 맞게 옵션을 조정하되, 기본 구조는 유지합니다.
-
----
-
-## 1. 문제 정의 (Problem Definition)
-
-### ❌ 부족 — 전혀 파악되지 않은 경우
-
-```
-질문: "이 연구에서 구체적으로 해결하거나 탐구하려는 문제가 무엇인가요?"
-옵션:
-  - "기존 방법의 성능/정확도를 개선하고 싶다"
-  - "새로운 방법론이나 모델을 제안하고 싶다"
-  - "특정 도메인에 기존 기술을 적용해보고 싶다"
-  - "데이터 분석으로 새로운 인사이트를 발견하고 싶다"
-```
-
-### 🟡 부분적 — 방향은 있으나 모호한 경우
-
-```
-질문: "[사용자가 언급한 방향]에서 좀 더 구체적으로, 어떤 측면에 집중하시나요?"
-옵션:
-  - "[구체 옵션 A — 사용자 맥락 기반]"
-  - "[구체 옵션 B — 사용자 맥락 기반]"
-  - "[구체 옵션 C — 사용자 맥락 기반]"
-```
+When each information axis is in ❌ Missing or 🟡 Partial status, refer to the templates below to construct an AskUserQuestion.
+Adjust options to fit the situation, but maintain the basic structure.
 
 ---
 
-## 2. 연구 목적 (Research Goal)
+## 1. Problem Definition
 
-### ❌ 부족
-
-```
-질문: "이 연구의 주된 목적은 무엇인가요?"
-옵션:
-  - "학위 논문 (석사/박사)"
-  - "학술 논문 (학회/저널 투고)"
-  - "개인 학습 및 포트폴리오"
-  - "실무/업무에 적용"
-```
-
-### 🟡 부분적
+### ❌ Missing — When nothing has been identified
 
 ```
-질문: "연구 결과를 최종적으로 어떤 형태로 활용할 계획인가요?"
-옵션:
-  - "논문으로 발표 (구체적 학회/저널이 있다)"
-  - "프로토타입을 만들어 검증까지"
-  - "개념 증명(PoC) 수준이면 충분"
-  - "아직 구체적으로 정하지 않았다"
+Question: "What specific problem are you trying to solve or explore in this research?"
+Options:
+  - "I want to improve the performance/accuracy of existing methods"
+  - "I want to propose a new methodology or model"
+  - "I want to apply existing techniques to a specific domain"
+  - "I want to discover new insights through data analysis"
+```
+
+### 🟡 Partial — When there is a direction but it is vague
+
+```
+Question: "Within [the direction the user mentioned], what specific aspect are you focusing on?"
+Options:
+  - "[Specific option A — based on user context]"
+  - "[Specific option B — based on user context]"
+  - "[Specific option C — based on user context]"
 ```
 
 ---
 
-## 3. 데이터 (Data)
+## 2. Research Goal
 
-### ❌ 부족
-
-```
-질문: "연구에 사용할 데이터는 어떻게 확보할 계획인가요?"
-옵션:
-  - "공개 데이터셋 사용 (Kaggle, HuggingFace, UCI 등)"
-  - "직접 수집 (웹 크롤링, API, 설문 등)"
-  - "소속 기관/연구실에서 제공받음"
-  - "아직 정하지 않았다 / 잘 모르겠다"
-```
-
-### 🟡 부분적 — 출처는 있으나 규모/형식 불명
+### ❌ Missing
 
 ```
-질문: "사용할 데이터의 대략적인 규모와 형식은 어떤가요?"
-옵션:
-  - "소규모 (수백~수천 건, 수 MB)"
-  - "중규모 (수만 건, 수백 MB~수 GB)"
-  - "대규모 (수십만 건 이상, 수십 GB+)"
-  - "아직 파악하지 못했다"
+Question: "What is the primary purpose of this research?"
+Options:
+  - "Degree thesis (Master's/PhD)"
+  - "Academic paper (conference/journal submission)"
+  - "Personal learning and portfolio"
+  - "Practical/workplace application"
 ```
 
----
-
-## 4. 핵심 기능/방법 (Core Methods)
-
-### ❌ 부족
+### 🟡 Partial
 
 ```
-질문: "연구에서 핵심적으로 사용할 기술이나 방법론은 무엇인가요?"
-옵션:
-  - "통계 분석 / 데이터 마이닝"
-  - "머신러닝 (분류, 회귀, 클러스터링 등)"
-  - "딥러닝 (CNN, RNN, Transformer 등)"
-  - "LLM 활용 (프롬프팅, RAG, 파인튜닝 등)"
-```
-
-### 🟡 부분적 — 방법은 언급했으나 구체성 부족
-
-```
-질문: "[사용자가 언급한 방법]을 좀 더 구체적으로 말씀해주시면, 어떤 수준의 구현을 생각하시나요?"
-옵션:
-  - "기존 모델/라이브러리를 그대로 사용"
-  - "기존 모델을 내 데이터로 파인튜닝"
-  - "기존 아키텍처를 수정/확장"
-  - "새로운 모델/알고리즘을 직접 설계"
+Question: "How do you plan to ultimately use the research results?"
+Options:
+  - "Publish as a paper (I have a specific conference/journal in mind)"
+  - "Build a prototype and validate it"
+  - "A proof-of-concept (PoC) level is sufficient"
+  - "I haven't decided specifically yet"
 ```
 
 ---
 
-## 5. 산출물 (Deliverables)
+## 3. Data
 
-### ❌ 부족
-
-```
-질문: "최종적으로 어떤 형태의 결과물을 만들고 싶으신가요?"
-옵션:
-  - "분석 보고서 / 논문 (결과 + 시각화)"
-  - "학습된 모델 (다른 사람이 사용 가능)"
-  - "웹 데모 / 대시보드 (인터랙티브)"
-  - "데이터셋 구축 (공개 또는 내부용)"
-```
-
----
-
-## 6. 규모/범위 (Scope)
-
-### ❌ 부족
+### ❌ Missing
 
 ```
-질문: "이 연구의 예상 기간과 참여 인원은 어떻게 되나요?"
-옵션:
-  - "1~2개월, 혼자 진행"
-  - "3~6개월, 혼자 진행"
-  - "3~6개월, 2~3명 팀"
-  - "6개월 이상, 연구실/팀 프로젝트"
+Question: "How do you plan to obtain the data for your research?"
+Options:
+  - "Use public datasets (Kaggle, HuggingFace, UCI, etc.)"
+  - "Collect it myself (web crawling, APIs, surveys, etc.)"
+  - "Provided by my institution/lab"
+  - "I haven't decided yet / I'm not sure"
+```
+
+### 🟡 Partial — Source is known but scale/format is unclear
+
+```
+Question: "What is the approximate scale and format of the data you plan to use?"
+Options:
+  - "Small scale (hundreds to thousands of records, a few MB)"
+  - "Medium scale (tens of thousands of records, hundreds of MB to a few GB)"
+  - "Large scale (hundreds of thousands of records or more, tens of GB+)"
+  - "I haven't determined this yet"
 ```
 
 ---
 
-## 7. 제약 조건 (Constraints)
+## 4. Core Methods
 
-### ❌ 부족
+### ❌ Missing
 
 ```
-질문: "연구 진행에 있어 장비나 예산 등의 제약이 있나요? (복수 선택 가능)"
+Question: "What core technology or methodology will you use in your research?"
+Options:
+  - "Statistical analysis / data mining"
+  - "Machine learning (classification, regression, clustering, etc.)"
+  - "Deep learning (CNN, RNN, Transformer, etc.)"
+  - "LLM utilization (prompting, RAG, fine-tuning, etc.)"
+```
+
+### 🟡 Partial — Method was mentioned but lacks specificity
+
+```
+Question: "Could you elaborate on [the method the user mentioned]? What level of implementation are you considering?"
+Options:
+  - "Use existing models/libraries as-is"
+  - "Fine-tune existing models on my data"
+  - "Modify/extend existing architectures"
+  - "Design a new model/algorithm from scratch"
+```
+
+---
+
+## 5. Deliverables
+
+### ❌ Missing
+
+```
+Question: "What form of final output would you like to produce?"
+Options:
+  - "Analysis report / paper (results + visualizations)"
+  - "Trained model (usable by others)"
+  - "Web demo / dashboard (interactive)"
+  - "Dataset construction (public or internal use)"
+```
+
+---
+
+## 6. Scope
+
+### ❌ Missing
+
+```
+Question: "What is the expected duration and team size for this research?"
+Options:
+  - "1-2 months, working alone"
+  - "3-6 months, working alone"
+  - "3-6 months, team of 2-3"
+  - "6+ months, lab/team project"
+```
+
+---
+
+## 7. Constraints
+
+### ❌ Missing
+
+```
+Question: "Are there any equipment or budget constraints for your research? (Multiple selections allowed)"
 multiSelect: true
-옵션:
-  - "GPU 서버가 없다 (CPU만 또는 Colab 무료 티어)"
-  - "유료 API/서비스 사용이 어렵다 (무료만 가능)"
-  - "특정 프로그래밍 언어만 사용 가능하다"
-  - "특별한 제약은 없다"
+Options:
+  - "No GPU server (CPU only or free-tier Colab)"
+  - "Cannot use paid APIs/services (free only)"
+  - "Can only use a specific programming language"
+  - "No particular constraints"
 ```
 
 ---
 
-## 복합 질문 구성 가이드
+## Compound Question Design Guide
 
-### 2개 축을 하나의 AskUserQuestion에 묶는 경우
+### Combining two axes into a single AskUserQuestion
 
-동시에 2개 축이 ❌ 부족일 때, 관련 있는 축끼리 묶어 한 번에 질의할 수 있습니다.
+When two axes are simultaneously ❌ Missing, related axes can be bundled together into a single query.
 
-**묶을 수 있는 조합:**
-- 문제 정의 + 핵심 방법 (무엇을 + 어떻게)
-- 연구 목적 + 산출물 (왜 + 결과물)
-- 규모/범위 + 제약 조건 (얼마나 + 제한)
+**Combinations that can be bundled:**
+- Problem Definition + Core Methods (what + how)
+- Research Goal + Deliverables (why + output)
+- Scope + Constraints (how much + limitations)
 
-**묶으면 안 되는 조합:**
-- 문제 정의 + 제약 조건 (너무 이질적)
-- 데이터 + 산출물 (관련성 낮음)
+**Combinations that should not be bundled:**
+- Problem Definition + Constraints (too dissimilar)
+- Data + Deliverables (low relevance)
 
-### 예시: 문제 정의 + 핵심 방법 복합 질문
+### Example: Problem Definition + Core Methods compound question
 
 ```
 questions:
-  - question: "이 연구에서 해결하려는 핵심 문제는 무엇인가요?"
-    옵션: [...]
-  - question: "주로 어떤 기술/방법론을 사용할 예정인가요?"
-    옵션: [...]
+  - question: "What is the core problem you are trying to solve in this research?"
+    Options: [...]
+  - question: "What technology/methodology do you plan to primarily use?"
+    Options: [...]
 ```
 
 ---
 
-## "잘 모르겠다" 응답 처리
+## Handling "I'm not sure" Responses
 
-사용자가 "잘 모르겠다" / "아직 정하지 않았다"를 선택한 경우:
+When the user selects "I'm not sure" / "I haven't decided yet":
 
-1. **해당 축을 추정으로 채움** (연구 주제와 문맥 기반)
-2. **추정임을 명시** (Phase 3 출력에서 *(추정)* 표기)
-3. **추가 질의를 하지 않음** (모르는 것을 계속 물어봐야 스트레스)
-4. **후속 분석에서 해당 부분을 유연하게 처리** (여러 시나리오 제시)
+1. **Fill in the axis with an estimate** (based on the research topic and context)
+2. **Clearly mark it as an estimate** (indicate *(estimated)* in Phase 3 output)
+3. **Do not ask additional questions** (repeatedly asking about unknowns causes stress)
+4. **Handle that part flexibly in subsequent analysis** (present multiple scenarios)

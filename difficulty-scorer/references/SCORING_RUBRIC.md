@@ -1,109 +1,68 @@
-# 난이도 채점 상세 루브릭
+# Difficulty Scoring Rubric
 
-## 1. 기술 격차 차원 (가중치 35%)
+## 1. Score Calculation Guide
 
-### 1.1 계산 방법
+A score from 0 to 100 is calculated by comprehensively considering the three factors below.
+Each factor is not individually scored and displayed in a table.
+They are used only as internal judgment criteria.
 
-```
-기술_격차_점수 = Σ(각 기술의 격차점수 × 기술가중치) / Σ(기술가중치)
+### Skill Gap (Greatest Weight)
 
-기술가중치:
-  - 필수 기술 (이것 없이는 연구 진행 불가): 가중치 3
-  - 중요 기술 (효율에 큰 영향): 가중치 2
-  - 보조 기술 (없어도 대안 가능): 가중치 1
-```
+Compare possession vs. lack of core skills.
 
-### 1.2 격차 점수 매핑
+**Gap Judgment Criteria:**
 
-| 보유 \ 필요 | 입문(1) | 초급(2) | 중급(3) | 고급(4) |
-|-------------|---------|---------|---------|---------|
-| **없음(0)** | 25 | 55 | 85 | 100 |
-| **입문(1)** | 0 | 30 | 60 | 85 |
-| **초급(2)** | 0 | 0 | 30 | 60 |
-| **중급(3)** | 0 | 0 | 0 | 30 |
-| **고급(4)** | 0 | 0 | 0 | 0 |
+| Status | Meaning | Difficulty Impact |
+|--------|---------|-------------------|
+| Possesses at or above required level | Strength | Lowers |
+| 1-level gap | Minor learning needed | Slightly raises |
+| 2-level gap | Significant learning needed | Considerably raises |
+| 3+ level gap | Must learn from basics | Greatly raises |
+| Entirely lacking all core skills | The entire area is completely new | Very greatly raises |
 
----
+**Core Skills vs. Supporting Skills:**
+- Gaps in core skills (research is impossible without them) have a major impact on difficulty
+- Gaps in supporting skills (alternatives available) have a minor impact
 
-## 2. 연구 복잡도 차원 (가중치 25%)
+### Research Complexity (Intrinsic Difficulty of the Research Itself)
 
-연구 자체의 기술적 복잡성. 사용자 역량과 무관한 절대 난이도.
+| Level | Characteristics |
+|-------|-----------------|
+| Low | Using existing tools/models as-is, simple analysis |
+| Medium | Fine-tuning existing models, medium-scale data, integrating multiple tools |
+| High | Custom model design, large-scale experiments, multimodal processing |
+| Very High | Novel architectures, distributed training, optimization research |
 
-| 점수 | 수준 | 기준 예시 |
-|------|------|-----------|
-| 0~20 | 매우 낮음 | 기술통계, 단순 시각화, 기존 API 호출 |
-| 21~40 | 낮음 | 기본 ML 분류/회귀, 간단한 데이터 파이프라인 |
-| 41~60 | 보통 | 딥러닝 fine-tuning, 중규모 데이터 처리, API 연동 |
-| 61~80 | 높음 | 커스텀 모델 설계, 대규모 실험, 멀티모달 처리 |
-| 81~100 | 매우 높음 | 새로운 아키텍처 설계, 분산 학습, 최적화 연구 |
+### Environmental Factors
 
-### 세부 채점 항목
-
-```
-기본 점수 = 해당 항목 합산
-
-[ ] +5: 기존 데이터셋으로 기본 분석
-[ ] +10: 데이터 수집 + 전처리 필요
-[ ] +10: 기존 모델 fine-tuning
-[ ] +15: 여러 모델 비교 실험
-[ ] +20: 커스텀 모델/알고리즘 설계
-[ ] +10: 외부 API 2개 이상 활용
-[ ] +15: 실시간 데이터 처리
-[ ] +15: 멀티모달 (텍스트+이미지 등)
-[ ] +10: 대규모 데이터 (10GB+)
-[ ] +20: 분산 학습 / 병렬 처리
-[ ] +10: 하이퍼파라미터 체계적 탐색
-[ ] +5: 재현성 보장 (seed, 환경 고정)
-```
+- **Tool Integration**: Complexity of connecting required tools/services
+- **Infrastructure**: Difficulty of setting up GPU, cloud, or specialized environments
+- **Project Scale**: Expected duration, code volume, number of experiments
 
 ---
 
-## 3. 도구 통합도 차원 (가중치 15%)
+## 2. Key Messages by Grade
 
-여러 도구/라이브러리/서비스 간 연동의 복잡성.
-
-| 점수 | 수준 | 기준 |
-|------|------|------|
-| 0~20 | 매우 낮음 | 단일 프레임워크 내에서 완결 (예: scikit-learn만) |
-| 21~40 | 낮음 | 2~3개 도구, 호환성 좋은 조합 (예: pandas + scikit-learn + matplotlib) |
-| 41~60 | 보통 | 4~5개 도구, 일부 데이터 형식 변환 필요 |
-| 61~80 | 높음 | 6개 이상 도구, 외부 API + DB + 모델 서빙 연동 |
-| 81~100 | 매우 높음 | 복잡한 파이프라인, 비표준 연동, 커스텀 어댑터 필요 |
+| Grade | Score | Tone to Convey to the User |
+|-------|-------|---------------------------|
+| 🟢 Easy | 0~20 | "Go ahead and start right away! Your current capabilities are more than sufficient." |
+| 🟢 Slightly Easy | 21~40 | "Do some light studying, then get started." |
+| 🟡 Moderate | 41~60 | "Learn the core skills first and take a step-by-step approach." |
+| 🟠 Difficult | 61~80 | "It's challenging, but achievable with step-by-step learning and mentor support." |
+| 🔴 Very Difficult | 81~100 | "We recommend narrowing the research scope or forming a team." |
 
 ---
 
-## 4. 인프라 요구도 차원 (가중치 15%)
+## 3. Learning Recommendation Priorities
 
-컴퓨팅 환경 구축 및 운영의 복잡성.
+| Priority | Meaning | Criteria |
+|----------|---------|----------|
+| 🔴 Required Prerequisite | Must learn before starting research | Core skill with a large gap |
+| 🟡 Parallel Learning | Can learn alongside the research | Important but not immediately needed, or the gap is small |
+| 🟢 Lower Priority | Can learn when needed | Supporting skill, or alternatives exist |
 
-| 점수 | 수준 | 기준 |
-|------|------|------|
-| 0~20 | 매우 낮음 | 로컬 PC (CPU)로 충분, Jupyter Notebook |
-| 21~40 | 낮음 | Google Colab 무료 티어, 간단한 환경 설정 |
-| 41~60 | 보통 | GPU 필요 (Colab Pro 또는 개인 GPU), Docker 사용 |
-| 61~80 | 높음 | 클라우드 GPU 인스턴스, 데이터 파이프라인, 실험 서버 |
-| 81~100 | 매우 높음 | HPC 클러스터, 멀티 GPU, 대용량 스토리지, 복잡한 네트워킹 |
-
----
-
-## 5. 프로젝트 규모 차원 (가중치 10%)
-
-| 점수 | 수준 | 기준 |
-|------|------|------|
-| 0~20 | 매우 작음 | 스크립트 1~3개, 1~2주 |
-| 21~40 | 작음 | 노트북 3~5개 + 스크립트, 2~4주 |
-| 41~60 | 보통 | 모듈화된 코드, 실험 여러 개, 1~3개월 |
-| 61~80 | 큼 | 여러 모듈, 데이터 파이프라인, 3~6개월 |
-| 81~100 | 매우 큼 | 대규모 시스템, 여러 사람 협업, 6개월+ |
-
----
-
-## 6. 등급별 권장 대응
-
-| 등급 | 점수 | 핵심 메시지 | 구체적 권장 |
-|------|------|-------------|-------------|
-| 🟢 쉬움 | 0~20 | "바로 시작하세요!" | 즉시 착수, 2주 내 첫 결과 |
-| 🟢 약간 쉬움 | 21~40 | "가벼운 학습 후 시작하세요" | 1~2주 학습 후 착수 |
-| 🟡 보통 | 41~60 | "체계적으로 접근하세요" | 핵심 기술 선행 학습(2~4주), MVP부터 |
-| 🟠 어려움 | 61~80 | "단계적으로 정복하세요" | 학습 로드맵 수립, 멘토 확보, 범위 축소 고려 |
-| 🔴 매우 어려움 | 81~100 | "전략적으로 범위를 조정하세요" | 연구 범위 대폭 축소 or 팀 구성 or 단계 분할 |
+**Principles for Writing Learning Recommendations:**
+- Specify the **concrete purpose within this research** for each item
+- Provide a **realistic estimated learning duration**
+- Where possible, recommend **specific learning resources** (official tutorials, particular courses, etc.)
+- 3 to 5 items is ideal (too many becomes overwhelming)
